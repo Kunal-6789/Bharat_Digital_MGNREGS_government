@@ -1,0 +1,8 @@
+Loom script <= 2 minutes:
+
+0:00-0:10 - Intro: "Our Voice, Our Rights — MGNREGA Maharashtra dashboard demo"
+0:10-0:30 - Show site (open http://localhost:5173), search or pick Pune, show tiles (Jobs, Avg days, Payment delay)
+0:30-0:45 - Click 'Explain (TTS)' to play Hindi/English summary; show history list
+0:45-1:05 - Open backend folder and show data/snapshots.json (Maharashtra demo data) and fetcher.js (explain optional live API)
+1:05-1:40 - Explain architecture: frontend (React PWA) -> backend snapshot -> DB/Redis in prod; mention rate-limit/backoff & offline snapshot
+1:40-2:00 - Closing: hosted URL (if deployed), GitHub link (if you push), and note that this demo uses Maharashtra sample data for stability.
