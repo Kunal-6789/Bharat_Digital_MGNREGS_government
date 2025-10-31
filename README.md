@@ -29,7 +29,7 @@ The system displays data from the backend (or local fallback JSON) in a **simple
 Shows title banner, voice search, and language selector.  
 Citizens can type or speak to search their district easily.
 
-![Bharat Digital MGNREGS Dashboard](./frontend/screenshort/bharat_digital_Home.png)
+![Bharat Digital MGNREGS Dashboard](./frontend/screenshort/bharat.png)
 
 🔍 **Search and Voice Input**  
 Voice recognition lets users say district names like “Pune” or “Nagpur”.  
