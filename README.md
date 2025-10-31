@@ -66,6 +66,16 @@ helping citizens understand progress or decline.
     B -->|Reads from| C[snapshots.json / data.js]
     A -->|Voice Input + TTS| D[Browser Speech API]
 
+## 🚀 Steps to Run Locally
+**Clone the Repository**
+git clone https://github.com/Kunal-6789/Bharat_Digital_MGNREGS_government.git
+cd Bharat_Digital_MGNREGS_government
+npm install
+cd backend
+npm run dev
+cd frontend 
+npm run dev
+
 ## ⚙️ Tech Stack
 
 **Frontend**
