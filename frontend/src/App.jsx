@@ -1,110 +1,123 @@
 // App.jsx
-import React, { useEffect, useMemo, useState } from 'react'
-import axios from 'axios'
-import DistrictCard from './components/DistrictCard'
-import { Search } from 'lucide-react'
-import fallbackData from './data/fallbackData.json' // ✅ Add this file in src/data/
+import React, { useEffect, useMemo, useState } from "react";
+import axios from "axios";
+import DistrictCard from "./components/DistrictCard";
+import { Search } from "lucide-react";
+import fallbackData from "./data/fallbackData.json"; // ✅ Add this file in src/data/
 
-const API = import.meta.env.VITE_API_BASE || 'http://localhost:4000/api'
+const API = import.meta.env.VITE_API_BASE || "http://localhost:4000/api";
 
 export default function App() {
-  const [query, setQuery] = useState('')
-  const [lang, setLang] = useState('hi')
-  const [list, setList] = useState([])
-  const [meta, setMeta] = useState({})
-  const [loading, setLoading] = useState(true)
+  const [query, setQuery] = useState("");
+  const [lang, setLang] = useState("hi");
+  const [list, setList] = useState([]);
+  const [meta, setMeta] = useState({});
+  const [loading, setLoading] = useState(true);
 
   // ✅ Load districts from backend, fallback to local JSON if failed
   useEffect(() => {
     async function fetchData() {
       try {
-        setLoading(true)
-        const res = await axios.get(`${API}/districts`, { timeout: 5000 })
-        setList(res.data.districts || [])
-        setMeta({ updated_at: res.data.updated_at || new Date().toISOString().split('T')[0] })
+        setLoading(true);
+        const res = await axios.get(`${API}/districts`, { timeout: 5000 });
+        setList(res.data.districts || []);
+        setMeta({
+          updated_at:
+            res.data.updated_at || new Date().toISOString().split("T")[0],
+        });
       } catch (err) {
-        console.warn('⚠️ Backend not reachable, loading fallback data...')
-        setList(fallbackData.districts || [])
-        setMeta({ updated_at: 'Local Snapshot' })
+        console.warn("⚠️ Backend not reachable, loading fallback data...");
+        setList(fallbackData.districts || []);
+        setMeta({ updated_at: "This Month" });
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
-    fetchData()
-  }, [])
+    fetchData();
+  }, []);
 
   // client-side filtered list for search
   const filtered = useMemo(() => {
-    if (!query.trim()) return list
-    const q = query.toLowerCase()
+    if (!query.trim()) return list;
+    const q = query.toLowerCase();
     return list.filter(
-      d =>
+      (d) =>
         d.district_name.toLowerCase().includes(q) ||
         d.district_code.toLowerCase().includes(q)
-    )
-  }, [list, query])
+    );
+  }, [list, query]);
 
   // compute state averages
   const stateAvg = useMemo(() => {
-    if (!list.length) return null
-    let count = 0, jobs = 0, days = 0, delay = 0, money = 0
+    if (!list.length) return null;
+    let count = 0,
+      jobs = 0,
+      days = 0,
+      delay = 0,
+      money = 0;
     for (const d of list) {
-      const latest = d.metrics?.latest
-      if (!latest) continue
-      count++
-      jobs += Number(latest.jobs_generated || 0)
-      days += Number(latest.avg_days_per_person || 0)
-      delay += Number(latest.payment_delay_days || 0)
-      money += Number(latest.money_spent || latest.total_wages || 0)
+      const latest = d.metrics?.latest;
+      if (!latest) continue;
+      count++;
+      jobs += Number(latest.jobs_generated || 0);
+      days += Number(latest.avg_days_per_person || 0);
+      delay += Number(latest.payment_delay_days || 0);
+      money += Number(latest.money_spent || latest.total_wages || 0);
     }
-    if (!count) return null
+    if (!count) return null;
     return {
       jobs: Math.round(jobs / count),
       avg_days: Number((days / count).toFixed(1)),
       delay: Number((delay / count).toFixed(1)),
-      money_spent: Math.round(money / count)
-    }
-  }, [list])
+      money_spent: Math.round(money / count),
+    };
+  }, [list]);
 
   // ranking by jobs_generated
   const ranks = useMemo(() => {
-    const arr = list.map(d => ({
+    const arr = list.map((d) => ({
       code: d.district_code,
-      jobs: Number(d.metrics?.latest?.jobs_generated || 0)
-    }))
-    arr.sort((a, b) => b.jobs - a.jobs)
-    const map = {}
-    arr.forEach((it, idx) => { map[it.code] = idx + 1 })
-    return { map, total: arr.length }
-  }, [list])
+      jobs: Number(d.metrics?.latest?.jobs_generated || 0),
+    }));
+    arr.sort((a, b) => b.jobs - a.jobs);
+    const map = {};
+    arr.forEach((it, idx) => {
+      map[it.code] = idx + 1;
+    });
+    return { map, total: arr.length };
+  }, [list]);
 
   // Voice input
   function startVoice() {
     const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition
+      window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert('Voice not supported in this browser')
-      return
+      alert("Voice not supported in this browser");
+      return;
     }
-    const rec = new SpeechRecognition()
-    rec.lang = lang === 'hi' ? 'hi-IN' : 'en-IN'
-    rec.interimResults = false
-    rec.maxAlternatives = 1
-    rec.onresult = e => setQuery(e.results[0][0].transcript)
-    rec.onerror = err => alert('Voice input error')
-    rec.start()
+    const rec = new SpeechRecognition();
+    rec.lang = lang === "hi" ? "hi-IN" : "en-IN";
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+    rec.onresult = (e) => setQuery(e.results[0][0].transcript);
+    rec.onerror = (err) => alert("Voice input error");
+    rec.start();
   }
 
   // Explain with TTS
   function explain(d) {
-    const latest = d.metrics?.latest || {}
+    const latest = d.metrics?.latest || {};
     const text =
-      lang === 'hi'
-        ? `${d.district_name} में ${latest.jobs_generated || 0} नौकरियाँ, औसत ${latest.avg_days_per_person || 0} दिन, भुगतान देरी ${latest.payment_delay_days || 0} दिन।`
-        : `${d.district_name}: ${latest.jobs_generated || 0} jobs, avg ${latest.avg_days_per_person || 0} days, payment delay ${latest.payment_delay_days || 0} days.`
-    const u = new SpeechSynthesisUtterance(text)
-    u.lang = lang === 'hi' ? 'hi-IN' : 'en-IN'
-    window.speechSynthesis.speak(u)
+      lang === "hi"
+        ? `${d.district_name} में ${latest.jobs_generated || 0} नौकरियाँ, औसत ${
+            latest.avg_days_per_person || 0
+          } दिन, भुगतान देरी ${latest.payment_delay_days || 0} दिन।`
+        : `${d.district_name}: ${latest.jobs_generated || 0} jobs, avg ${
+            latest.avg_days_per_person || 0
+          } days, payment delay ${latest.payment_delay_days || 0} days.`;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = lang === "hi" ? "hi-IN" : "en-IN";
+    window.speechSynthesis.speak(u);
   }
 
   return (
@@ -118,7 +131,11 @@ export default function App() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder={lang === "hi" ? "जिला खोजें या बोलें..." : "Search district or speak..."}
+              placeholder={
+                lang === "hi"
+                  ? "जिला खोजें या बोलें..."
+                  : "Search district or speak..."
+              }
               className="search-input"
             />
             <button
@@ -143,7 +160,9 @@ export default function App() {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
         <div className="district-card">
-          <div className="small">{lang === "hi" ? "कुल जिलों की संख्या" : "Total districts"}</div>
+          <div className="small">
+            {lang === "hi" ? "कुल जिलों की संख्या" : "Total districts"}
+          </div>
           <div className="metric">{list.length}</div>
         </div>
 
@@ -155,7 +174,9 @@ export default function App() {
         </div>
 
         <div className="district-card">
-          <div className="small">{lang === "hi" ? "अंतिम अपडेट" : "Last updated"}</div>
+          <div className="small">
+            {lang === "hi" ? "अंतिम अपडेट" : "Last updated"}
+          </div>
           <div className="metric text-blue-600">{meta.updated_at || "N/A"}</div>
         </div>
       </div>
@@ -163,7 +184,7 @@ export default function App() {
       {/* District List */}
       {loading ? (
         <div className="text-center text-gray-600 py-20">
-          {lang === 'hi' ? 'लोड हो रहा है...' : 'Loading...'}
+          {lang === "hi" ? "लोड हो रहा है..." : "Loading..."}
         </div>
       ) : (
         <div className="district-list">
@@ -174,12 +195,12 @@ export default function App() {
               lang={lang}
               onExplain={explain}
               stateAvg={stateAvg}
-              rank={ranks.map[d.district_code]}
-              totalDistricts={ranks.total}
+              rank={ranks.map?.[String(d.district_code)] || "-"}
+              totalDistricts={ranks.total || filtered.length}
             />
           ))}
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -9,7 +9,12 @@
           "avg_days_per_person": 34.5,
           "payment_delay_days": 3,
           "money_spent": 14500000
-        }
+        },
+        "history": [
+          { "month": "June", "jobs_generated": 10000, "money_spent": 12000000 },
+          { "month": "July", "jobs_generated": 11000, "money_spent": 13000000 },
+          { "month": "August", "jobs_generated": 12000, "money_spent": 14500000 }
+        ]
       }
     },
     {
@@ -21,7 +26,12 @@
           "avg_days_per_person": 29.1,
           "payment_delay_days": 4,
           "money_spent": 9700000
-        }
+        },
+        "history": [
+          { "month": "June", "jobs_generated": 7800, "money_spent": 8900000 },
+          { "month": "July", "jobs_generated": 8200, "money_spent": 9200000 },
+          { "month": "August", "jobs_generated": 8600, "money_spent": 9700000 }
+        ]
       }
     },
     {
@@ -33,7 +43,12 @@
           "avg_days_per_person": 32.8,
           "payment_delay_days": 2,
           "money_spent": 12500000
-        }
+        },
+        "history": [
+          { "month": "June", "jobs_generated": 9600, "money_spent": 11200000 },
+          { "month": "July", "jobs_generated": 10100, "money_spent": 11900000 },
+          { "month": "August", "jobs_generated": 10500, "money_spent": 12500000 }
+        ]
       }
     },
     {
@@ -45,7 +60,12 @@
           "avg_days_per_person": 30.4,
           "payment_delay_days": 5,
           "money_spent": 11000000
-        }
+        },
+        "history": [
+          { "month": "June", "jobs_generated": 8700, "money_spent": 10200000 },
+          { "month": "July", "jobs_generated": 9100, "money_spent": 10600000 },
+          { "month": "August", "jobs_generated": 9400, "money_spent": 11000000 }
+        ]
       }
     }
   ]
