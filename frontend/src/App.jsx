@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
 import DistrictCard from './components/DistrictCard'
 import { Search } from 'lucide-react'
+import fallbackData from './data/fallbackData.json' // ✅ Add this file in src/data/
 
 const API = import.meta.env.VITE_API_BASE || 'http://localhost:4000/api'
 
@@ -13,18 +14,18 @@ export default function App() {
   const [meta, setMeta] = useState({})
   const [loading, setLoading] = useState(true)
 
-  // ✅ Load districts from backend (includes metrics)
+  // ✅ Load districts from backend, fallback to local JSON if failed
   useEffect(() => {
     async function fetchData() {
       try {
         setLoading(true)
-        const res = await axios.get(`${API}/districts`)
-        // res.data.districts is an array where each item has metrics
+        const res = await axios.get(`${API}/districts`, { timeout: 5000 })
         setList(res.data.districts || [])
-        setMeta({ updated_at: res.data.updated_at })
+        setMeta({ updated_at: res.data.updated_at || new Date().toISOString().split('T')[0] })
       } catch (err) {
-        console.error('Fetch failed:', err)
-        alert('Unable to load districts. Check backend is running.')
+        console.warn('⚠️ Backend not reachable, loading fallback data...')
+        setList(fallbackData.districts || [])
+        setMeta({ updated_at: 'Local Snapshot' })
       } finally {
         setLoading(false)
       }
@@ -34,7 +35,7 @@ export default function App() {
 
   // client-side filtered list for search
   const filtered = useMemo(() => {
-    if (!query || query.trim().length < 1) return list
+    if (!query.trim()) return list
     const q = query.toLowerCase()
     return list.filter(
       d =>
@@ -43,9 +44,9 @@ export default function App() {
     )
   }, [list, query])
 
-  // compute state averages (safe numeric parsing)
+  // compute state averages
   const stateAvg = useMemo(() => {
-    if (!list || list.length === 0) return null
+    if (!list.length) return null
     let count = 0, jobs = 0, days = 0, delay = 0, money = 0
     for (const d of list) {
       const latest = d.metrics?.latest
@@ -56,7 +57,7 @@ export default function App() {
       delay += Number(latest.payment_delay_days || 0)
       money += Number(latest.money_spent || latest.total_wages || 0)
     }
-    if (count === 0) return null
+    if (!count) return null
     return {
       jobs: Math.round(jobs / count),
       avg_days: Number((days / count).toFixed(1)),
@@ -65,16 +66,19 @@ export default function App() {
     }
   }, [list])
 
-  // compute ranking by jobs_generated (desc)
+  // ranking by jobs_generated
   const ranks = useMemo(() => {
-    const arr = list.map(d => ({ code: d.district_code, jobs: Number(d.metrics?.latest?.jobs_generated || 0) }))
-    arr.sort((a,b) => b.jobs - a.jobs)
+    const arr = list.map(d => ({
+      code: d.district_code,
+      jobs: Number(d.metrics?.latest?.jobs_generated || 0)
+    }))
+    arr.sort((a, b) => b.jobs - a.jobs)
     const map = {}
     arr.forEach((it, idx) => { map[it.code] = idx + 1 })
     return { map, total: arr.length }
   }, [list])
 
-  // Voice input (unchanged)
+  // Voice input
   function startVoice() {
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition
@@ -86,18 +90,12 @@ export default function App() {
     rec.lang = lang === 'hi' ? 'hi-IN' : 'en-IN'
     rec.interimResults = false
     rec.maxAlternatives = 1
-    rec.onresult = e => {
-      const t = e.results[0][0].transcript
-      setQuery(t)
-    }
-    rec.onerror = err => {
-      console.error('Speech error', err)
-      alert('Voice input error')
-    }
+    rec.onresult = e => setQuery(e.results[0][0].transcript)
+    rec.onerror = err => alert('Voice input error')
     rec.start()
   }
 
-  // Explain with TTS (unchanged)
+  // Explain with TTS
   function explain(d) {
     const latest = d.metrics?.latest || {}
     const text =
@@ -120,11 +118,7 @@ export default function App() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder={
-                lang === "hi"
-                  ? "जिला खोजें या बोलें..."
-                  : "Search district or speak..."
-              }
+              placeholder={lang === "hi" ? "जिला खोजें या बोलें..." : "Search district or speak..."}
               className="search-input"
             />
             <button
@@ -149,25 +143,19 @@ export default function App() {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
         <div className="district-card">
-          <div className="small">
-            {lang === "hi" ? "कुल जिलों की संख्या" : "Total districts"}
-          </div>
+          <div className="small">{lang === "hi" ? "कुल जिलों की संख्या" : "Total districts"}</div>
           <div className="metric">{list.length}</div>
         </div>
 
         <div className="district-card">
-          <div className="small">
-            {lang === "hi" ? "राज्य" : "State"}
-          </div>
+          <div className="small">{lang === "hi" ? "राज्य" : "State"}</div>
           <div className="text-3xl font-bold text-orange-500">
             {lang === "hi" ? "महाराष्ट्र" : "Maharashtra"}
           </div>
         </div>
 
         <div className="district-card">
-          <div className="small">
-            {lang === "hi" ? "अंतिम अपडेट" : "Last updated"}
-          </div>
+          <div className="small">{lang === "hi" ? "अंतिम अपडेट" : "Last updated"}</div>
           <div className="metric text-blue-600">{meta.updated_at || "N/A"}</div>
         </div>
       </div>

@@ -1,0 +1,52 @@
+{
+  "districts": [
+    {
+      "district_code": "PUNE",
+      "district_name": "Pune",
+      "metrics": {
+        "latest": {
+          "jobs_generated": 12000,
+          "avg_days_per_person": 34.5,
+          "payment_delay_days": 3,
+          "money_spent": 14500000
+        }
+      }
+    },
+    {
+      "district_code": "NAG",
+      "district_name": "Nagpur",
+      "metrics": {
+        "latest": {
+          "jobs_generated": 8600,
+          "avg_days_per_person": 29.1,
+          "payment_delay_days": 4,
+          "money_spent": 9700000
+        }
+      }
+    },
+    {
+      "district_code": "SOL",
+      "district_name": "Solapur",
+      "metrics": {
+        "latest": {
+          "jobs_generated": 10500,
+          "avg_days_per_person": 32.8,
+          "payment_delay_days": 2,
+          "money_spent": 12500000
+        }
+      }
+    },
+    {
+      "district_code": "NAS",
+      "district_name": "Nashik",
+      "metrics": {
+        "latest": {
+          "jobs_generated": 9400,
+          "avg_days_per_person": 30.4,
+          "payment_delay_days": 5,
+          "money_spent": 11000000
+        }
+      }
+    }
+  ]
+}
